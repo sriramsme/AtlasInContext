@@ -7,7 +7,7 @@ import './style.css';
 // CONFIGURATION
 // ============================================================================
 
-const IS_PROD = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+const IS_PROD = true;//window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 const REPO_OWNER = 'sriramsme'; // Based on project attribution
 const REPO_NAME = 'AtlasInContext';
 
