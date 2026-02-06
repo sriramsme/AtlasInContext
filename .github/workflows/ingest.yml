@@ -19,13 +19,12 @@ on:
 jobs:
   ingest-and-process:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          # Set persist-credentials to false to allow pushing with GITHUB_TOKEN
-          persist-credentials: false
       
       - name: Install uv
         uses: astral-sh/setup-uv@v5
