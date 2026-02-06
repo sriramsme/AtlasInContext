@@ -20,21 +20,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
-      
-      - name: Install Python dependencies
-        run: |
-          pip install --upgrade pip
-          pip install requests h3 pandas
-      
+          enable-cache: true
+          cache-dependency-glob: "ingest/uv.lock"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
       - name: Run Ingestion Pipeline
         run: |
           cd ingest/src
-          python main.py
+          uv run main.py
         continue-on-error: false
       
       - name: Generate data manifest

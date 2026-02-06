@@ -20,8 +20,12 @@ def main():
     
     # 1. Fetch Data
     print("\n[STEP 1/3] Fetching GDELT Data...")
+    import os
+    max_events = os.getenv("MAX_EVENTS")
+    max_events = int(max_events) if max_events and max_events.isdigit() else None
+    
     try:
-        fetch_gdelt.run(num_of_blocks=32, max_events=None)
+        fetch_gdelt.run(num_of_blocks=32, max_events=max_events)
     except Exception as e:
         print(f"❌ Step 1 failed: {e}")
         sys.exit(1)
