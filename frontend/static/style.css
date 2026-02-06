@@ -1,0 +1,199 @@
+/* AIC Custom Styles */
+
+/* Critical CSS for immediate render */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.8);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 1);
+}
+
+/* Side panel transitions */
+#sidePanel {
+  transition: transform 0.3s ease-out;
+  pointer-events: auto;
+}
+
+#sidePanel.open {
+  transform: translateX(0) !important;
+}
+
+/* Z-index hierarchy */
+#map {
+  z-index: 1;
+}
+
+#bottomBar {
+  z-index: 10;
+}
+
+.maplibregl-ctrl-bottom-left {
+  z-index: 15 !important;
+}
+
+.maplibregl-ctrl-bottom-right {
+  z-index: 15 !important;
+}
+
+#panelBackdrop {
+  z-index: 35;
+}
+
+#sidePanel {
+  z-index: 40;
+}
+
+/* Ensure bottom bar is visible on desktop */
+@media (min-width: 768px) {
+  #bottomBar .hidden.md\:flex {
+    display: flex !important;
+  }
+
+  /* Ensure text is readable - default styles */
+  #bottomBar {
+    color: white;
+  }
+
+  #bottomBar span,
+  #bottomBar button {
+    color: inherit;
+  }
+}
+
+/* Mobile bottom sheet on iOS/Android */
+@media (max-width: 768px) {
+  #sidePanel {
+    top: auto;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    height: 80vh;
+    max-height: 80vh;
+    width: 100%;
+    transform: translateY(100%);
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px 20px 0 0;
+  }
+
+  #sidePanel.open {
+    transform: translateY(0) !important;
+  }
+}
+
+/* Ensure MapLibre popups appear above bottom bar */
+.maplibregl-popup {
+  z-index: 50 !important;
+}
+
+/* Custom popup styling */
+.hover-tooltip .maplibregl-popup-content {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.detail-modal .maplibregl-popup-content {
+  padding: 0 !important;
+  background: transparent !important;
+  max-width: 400px !important;
+}
+
+/* Smooth transitions for interactive elements */
+button {
+  transition: all 0.2s ease;
+}
+
+/* Ensure proper stacking of map controls */
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl-bottom-right {
+  z-index: 15 !important;
+  margin-bottom: 90px !important;
+  /* Space for full-width bottom bar */
+}
+
+@media (max-width: 768px) {
+
+  .maplibregl-ctrl-bottom-left,
+  .maplibregl-ctrl-bottom-right {
+    margin-bottom: 130px !important;
+    /* More space on mobile */
+  }
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

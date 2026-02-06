@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlas In Context - see beyond the headlines</title>
+  <meta name="description" content="Visualize the tension between headline noise and global progress">
+
+  <meta name="author" content="sriramsme">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:image" content="static/main/images/ppic.jpg">
+  <meta property="og:title" content="Atlas In Context - see beyond the headlines">
+  <meta property="og:description" content="Visualize the tension between headline noise and global progress">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="static/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="static/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="static/favicon/favicon-16x16.png">
+  <link rel="manifest" href="static/favicon/site.webmanifest">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <!-- stylesheets -->
+  <link rel="stylesheet" type="text/css" href="static/style.css">
+
+  <link rel="preconnect" href="https://unpkg.com">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          screens: {
+            'sm': '640px',
+            'md': '768px',
+            'lg': '1024px',
+            'xl': '1280px',
+          }
+        }
+      }
+    }
+  </script>
+
+</head>
+
+<body class="bg-slate-900 text-white">
+
+  <!-- Map Container (Full Screen) -->
+  <div id="map"></div>
+
+  <!-- Top Bar - Logo & Panel Toggle -->
+  <header class="absolute top-0 left-10 right-0 z-20 pointer-events-none">
+    <div class="px-4 py-4 flex items-center justify-end pointer-events-auto">
+
+      <!-- Side Panel Toggle (Desktop) / Menu (Mobile) -->
+      <button id="btnTogglePanel"
+        class="bg-slate-900/90 backdrop-blur-lg rounded-xl px-4 py-2 shadow-lg border border-white/10 hover:border-green-500/50 transition-all"
+        aria-label="Toggle info panel">
+        <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Bottom Control Bar - Floating Island Design -->
+  <div id="bottomBar"
+    class="fixed bottom-0 left-0 right-0 z-10 pointer-events-none flex flex-col items-center justify-end pb-6 md:pb-8">
+
+    <!-- Desktop Layout: Dynamic Island -->
+    <div
+      class="hidden md:flex pointer-events-auto items-center gap-8 bg-slate-900/90 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-full px-8 py-3 transition-all duration-300 hover:bg-slate-900/95 hover:border-white/20 hover:scale-[1.01] hover:shadow-green-900/20">
+
+      <!-- Left Stats Group -->
+      <div class="flex items-center gap-6">
+
+
+        <!-- Global Progress -->
+        <div class="group relative flex flex-col items-center">
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1.5">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
+              </path>
+            </svg>
+            Progress
+          </div>
+          <div id="pulseProgress" class="text-2xl font-bold text-green-400 tabular-nums">--</div>
+          <!-- Tooltip -->
+          <div
+            class="absolute bottom-full left-0 mb-2 hidden group-hover:block w-48 bg-slate-800 text-white text-xs rounded-lg p-2 shadow-xl border border-slate-700 z-50">
+            Total global events indicating positive change, development, and human progress
+          </div>
+        </div>
+
+        <!-- Global Noise -->
+        <div class="group relative flex flex-col items-center">
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1.5">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+              </path>
+            </svg>
+            Noise
+          </div>
+          <div id="pulseNoise" class="text-2xl font-bold text-red-400 tabular-nums">--</div>
+          <!-- Tooltip -->
+          <div
+            class="absolute bottom-full left-0 mb-2 hidden group-hover:block w-48 bg-slate-800 text-white text-xs rounded-lg p-2 shadow-xl border border-slate-700 z-50">
+            Events related to conflict, crisis, and negative disruption capturing media attention
+          </div>
+        </div>
+
+        <!-- Humanity Ratio -->
+        <div class="group relative flex flex-col items-center">
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1.5">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3">
+              </path>
+            </svg>
+            Ratio
+          </div>
+          <div id="pulseRatio" class="text-2xl font-bold tabular-nums">--</div>
+          <!-- Tooltip -->
+          <div
+            class="absolute bottom-full left-0 mb-2 hidden group-hover:block w-48 bg-slate-800 text-white text-xs rounded-lg p-2 shadow-xl border border-slate-700 z-50">
+            Progress-to-noise ratio. Values >1 indicate more progress than crisis in the global narrative
+          </div>
+        </div>
+      </div>
+
+      <!-- Center View Controls -->
+      <div class="flex items-center gap-2 bg-slate-800/50 rounded-xl p-1.5 border border-slate-700/50">
+        <button id="btnBalancedView"
+          class="px-4 py-2 rounded-lg font-medium text-sm transition-all bg-gradient-to-r from-green-500 to-blue-500 text-white shadow-lg"
+          title="Balanced view combining sentiment and themes">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3">
+              </path>
+            </svg>
+            Balanced
+          </div>
+        </button>
+        <button id="btnProgressView"
+          class="px-4 py-2 rounded-lg font-medium text-sm transition-all text-slate-400 hover:text-white hover:bg-slate-700/50"
+          title="Focus on progress and development">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
+              </path>
+            </svg>
+            Progress
+          </div>
+        </button>
+        <button id="btnNoiseView"
+          class="px-4 py-2 rounded-lg font-medium text-sm transition-all text-slate-400 hover:text-white hover:bg-slate-700/50"
+          title="Focus on crises and conflicts">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+              </path>
+            </svg>
+            Noise
+          </div>
+        </button>
+      </div>
+
+      <!-- Right Stats & Actions -->
+      <div class="flex items-center gap-6">
+        <!-- Global Vibe -->
+        <div class="group relative flex flex-col items-center cursor-default">
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1.5">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
+              </path>
+            </svg>
+            Vibe
+          </div>
+          <div id="statAvgVibe" class="text-2xl font-bold tabular-nums">--</div>
+          <!-- Tooltip -->
+          <div
+            class="absolute bottom-full right-0 mb-2 hidden group-hover:block w-48 bg-slate-800 text-white text-xs rounded-lg p-2 shadow-xl border border-slate-700 z-50">
+            Average global sentiment score (0.0 to 1.0)
+          </div>
+        </div>
+
+        <!-- Active Regions -->
+        <div class="group relative flex flex-col items-center">
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1.5">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            Regions
+          </div>
+          <div id="statRegions" class="text-2xl font-bold text-slate-200 tabular-nums">--</div>
+          <!-- Tooltip -->
+          <div
+            class="absolute bottom-full right-0 mb-2 hidden group-hover:block w-48 bg-slate-800 text-white text-xs rounded-lg p-2 shadow-xl border border-slate-700 z-50">
+            Number of geographic regions with active news coverage in this view
+          </div>
+        </div>
+
+        <!-- Total Events -->
+        <div class="group relative flex flex-col items-center">
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1.5">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z">
+              </path>
+            </svg>
+            Events
+          </div>
+          <div id="statEvents" class="text-2xl font-bold text-slate-200 tabular-nums">--</div>
+          <!-- Tooltip -->
+          <div
+            class="absolute bottom-full right-0 mb-2 hidden group-hover:block w-48 bg-slate-800 text-white text-xs rounded-lg p-2 shadow-xl border border-slate-700 z-50">
+            Total news events analyzed from GDELT database in current timeframe
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Mobile Layout: Floating Panel -->
+  <div
+    class="md:hidden pointer-events-auto w-[calc(100%-2rem)] max-w-md mx-auto bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-3">
+    <!-- View Mode Selector -->
+    <div class="flex gap-2 mb-3 bg-slate-800/50 rounded-lg p-1">
+      <button id="btnBalancedViewMobile"
+        class="flex-1 px-3 py-2 rounded-md font-medium text-xs transition-all bg-gradient-to-r from-green-500 to-blue-500 text-white"
+        title="Balanced">
+        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3">
+          </path>
+        </svg>
+      </button>
+      <button id="btnProgressViewMobile"
+        class="flex-1 px-3 py-2 rounded-md font-medium text-xs transition-all text-slate-400 bg-slate-800/50"
+        title="Progress">
+        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
+          </path>
+        </svg>
+      </button>
+      <button id="btnNoiseViewMobile"
+        class="flex-1 px-3 py-2 rounded-md font-medium text-xs transition-all text-slate-400 bg-slate-800/50"
+        title="Noise">
+        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+          </path>
+        </svg>
+      </button>
+      <button id="btnRefreshMobile" class="px-3 py-2 rounded-md text-slate-400 bg-slate-800/50" title="Refresh">
+        <svg id="refreshIconMobile" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+          </path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Compact Stats Grid -->
+    <div class="grid grid-cols-3 gap-3 text-center">
+      <div>
+        <div class="text-[9px] uppercase tracking-wider text-slate-500 mb-0.5">Progress</div>
+        <div id="pulseProgressMobile" class="text-lg font-bold text-green-400 tabular-nums">--</div>
+      </div>
+      <div>
+        <div class="text-[9px] uppercase tracking-wider text-slate-500 mb-0.5">Noise</div>
+        <div id="pulseNoiseMobile" class="text-lg font-bold text-red-400 tabular-nums">--</div>
+      </div>
+      <div>
+        <div class="text-[9px] uppercase tracking-wider text-slate-500 mb-0.5">Ratio</div>
+        <div id="pulseRatioMobile" class="text-lg font-bold tabular-nums">--</div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+  </div>
+  </div>
+
+  <!-- Side Panel (Desktop) / Bottom Sheet (Mobile) -->
+  <aside id="sidePanel"
+    class="fixed inset-y-0 right-0 z-40 w-full sm:w-96 transform translate-x-full transition-transform duration-300 ease-out">
+    <div class="h-full bg-slate-900/98 backdrop-blur-xl shadow-2xl border-l border-white/10 flex flex-col">
+
+      <!-- Panel Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+        <div class="flex flex-col gap-1">
+          <h2 class="text-lg font-bold text-slate-200">Atlas In Context</h2>
+          <a href="https://srirams.me" target="_blank"
+            class="text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1.5 w-fit bg-slate-800/50 hover:bg-green-500/10 px-2 py-0.5 rounded-full border border-slate-700/50 hover:border-green-500/30">
+            <span>Made by</span> <span class="font-bold text-green-400">@sriramsme</span>
+          </a>
+        </div>
+        <button id="btnClosePanel" class="text-slate-400 hover:text-white transition-colors" aria-label="Close panel">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Panel Content (Scrollable) -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar">
+
+        <!-- Section: Top Global Stories -->
+        <section class="px-6 py-6 border-b border-slate-800">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                </path>
+              </svg>
+              Top Global Stories
+            </h3>
+            <span class="text-xs text-slate-500">Progress-weighted</span>
+          </div>
+          <div id="insightsList" class="space-y-2">
+            <div class="text-xs text-slate-400 text-center py-4">Loading insights...</div>
+          </div>
+        </section>
+
+        <!-- Section: Analytics Deep Dive -->
+        <section class="px-6 py-6 border-b border-slate-800">
+          <h3 class="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+              </path>
+            </svg>
+            Analytics
+          </h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-slate-400">Global Vibe</span>
+              <span id="statAvgVibeSide" class="text-sm font-bold">--</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-slate-400">Noise Events</span>
+              <span id="statNoise" class="text-sm font-bold text-red-400">--</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-slate-400">Progress Events</span>
+              <span id="statProgress" class="text-sm font-bold text-green-400">--</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Data Source -->
+        <section class="px-6 py-6">
+          <h3 class="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0">
+              </path>
+            </svg>
+            Data Source
+          </h3>
+          <div class="text-xs text-slate-400 space-y-2">
+            <div>
+              <span class="text-slate-500">Last updated:</span>
+              <span id="lastUpdated" class="text-slate-300 font-mono">--</span>
+            </div>
+            <div>
+              <span class="text-slate-500">Source:</span>
+              <span class="text-slate-300">GDELT GKG 2.1</span>
+            </div>
+            <div class="pt-2 border-t border-slate-800 text-slate-500">
+              <span class="text-[10px]">GPU-accelerated rendering</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: How It Works -->
+        <section class="px-6 py-6 border-b border-slate-800">
+          <h3 class="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            How It Works
+          </h3>
+          <div class="space-y-3 text-xs text-slate-400">
+            <p><strong class="text-slate-300">Balanced View:</strong> Shows the overall "vibe" combining news sentiment
+              and thematic categories.</p>
+            <p><strong class="text-green-400">Progress View:</strong> Highlights regions with development, health, aid,
+              and positive change stories.</p>
+            <p><strong class="text-red-400">Noise View:</strong> Shows areas with conflict, protests, violence, and
+              crisis events.</p>
+            <p class="pt-2 border-t border-slate-700"><strong class="text-slate-300">Data:</strong> Real-time GDELT
+              Global Knowledge Graph analysis with H3 spatial indexing.</p>
+          </div>
+        </section>
+
+        <!-- Section: Color Scale Legend -->
+        <section class="px-6 py-6 border-b border-slate-800">
+          <h3 class="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01">
+              </path>
+            </svg>
+            Color Scale
+          </h3>
+          <div id="legendItems" class="space-y-2 text-xs">
+            <!-- Legend will be updated by JS -->
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 rounded bg-red-500"></div>
+              <span class="text-slate-300">Crisis (-1.0 to -0.5)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 rounded bg-orange-500"></div>
+              <span class="text-slate-300">Tense (-0.5 to 0.0)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 rounded bg-yellow-400"></div>
+              <span class="text-slate-300">Neutral (0.0 to 0.3)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 rounded bg-lime-500"></div>
+              <span class="text-slate-300">Stable (0.3 to 0.6)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 rounded bg-green-500"></div>
+              <span class="text-slate-300">Thriving (0.6 to 1.0)</span>
+            </div>
+          </div>
+        </section>
+
+
+      </div>
+    </div>
+  </aside>
+
+  <!-- Panel Backdrop (Mobile) -->
+  <div id="panelBackdrop" class="fixed inset-0 bg-black/50 z-35 hidden"></div>
+
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="absolute inset-0 flex items-center justify-center bg-slate-900 z-50">
+    <div class="text-center">
+      <div class="inline-block w-16 h-16 border-4 border-slate-700 border-t-green-500 rounded-full animate-spin"></div>
+      <p id="loadingText" class="mt-4 text-slate-400">Initializing Atlas In Context...</p>
+      <p id="loadingSubtext" class="mt-2 text-xs text-slate-500">Loading global data</p>
+    </div>
+  </div>
+
+  <!-- Error Screen -->
+  <div id="errorScreen" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900 z-50">
+    <div class="text-center max-w-md p-8">
+      <div class="text-6xl mb-4">❌</div>
+      <h2 class="text-xl font-bold text-red-400 mb-2">Failed to Load Atlas In Context</h2>
+      <p id="errorMessage" class="text-slate-400 mb-4">An error occurred while loading the map data.</p>
+      <button id="btnRetry"
+        class="px-6 py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-all">
+        Retry
+      </button>
+      <div class="mt-4 text-xs text-slate-500">
+        <details>
+          <summary class="cursor-pointer hover:text-slate-300">Technical Details</summary>
+          <pre id="errorDetails" class="mt-2 text-left bg-slate-800 p-3 rounded text-xs overflow-auto max-h-40"></pre>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/static/main.js"></script>
+
+</body>
+
+</html>
