@@ -23,9 +23,12 @@ def main():
     import os
     max_events = os.getenv("MAX_EVENTS")
     max_events = int(max_events) if max_events and max_events.isdigit() else None
+
+    num_of_hours = os.getenv("NUM_OF_HOURS")
+    num_of_hours = int(num_of_hours) if num_of_hours and num_of_hours.isdigit() else 8
     
     try:
-        fetch_gdelt.run(num_of_blocks=32, max_events=max_events)
+        fetch_gdelt.run(num_of_hours=num_of_hours, max_events=max_events)
     except Exception as e:
         print(f"❌ Step 1 failed: {e}")
         sys.exit(1)

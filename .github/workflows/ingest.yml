@@ -10,7 +10,11 @@ on:
       max_events:
         description: 'Maximum events to fetch'
         required: false
-        default: '2000'
+        default: 'None'
+      num_of_hours:
+        description: 'Number of hours to fetch'
+        required: false
+        default: '8'
 
 jobs:
   ingest-and-process:
@@ -19,6 +23,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Set persist-credentials to false to allow pushing with GITHUB_TOKEN
+          persist-credentials: false
       
       - name: Install uv
         uses: astral-sh/setup-uv@v5

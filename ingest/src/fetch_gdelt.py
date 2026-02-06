@@ -457,10 +457,11 @@ def save_raw_events(events: List[RawEvent], suffix: str = "") -> None:
     print(f"📦 File size: {output_file.stat().st_size / (1024*1024):.2f} MB")
 
 
-def run(num_of_blocks: int = 3, max_events: Optional[int] = None):
+def run(num_of_hours: int = 8, max_events: Optional[int] = None):
     print("🚀 AIC GDELT Ingestion Pipeline (PRODUCTION)")
     print("=" * 60)
     
+    num_of_blocks = num_of_hours * 5 # each block/csv file is of 15 minutes
     start_time = time.time()
     
     try:
